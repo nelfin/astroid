@@ -1978,6 +1978,25 @@ def test_issue940_metaclass_property():
     assert [c.value for c in inferred.elts] == ['a', 'property']
 
 
+def test_issue940_with_metaclass_class_context_property():
+    node = builder.extract_node(
+        """
+    class BaseMeta(type):
+        pass
+    class Parent(metaclass=BaseMeta):
+        @property
+        def __members__(cls):
+            return ['a', 'property']
+    class Derived(Parent):
+        pass
+    Derived.__members__
+    """
+    )
+    inferred = next(node.infer())
+    assert not isinstance(inferred, nodes.List)
+    assert isinstance(inferred, objects.Property)
+
+
 def test_issue940_metaclass_values_funcdef():
     node = builder.extract_node(
         """

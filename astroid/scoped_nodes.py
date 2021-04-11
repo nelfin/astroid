@@ -2560,7 +2560,7 @@ class ClassDef(mixins.FilterStmtsMixin, LocalsDictNodeNG, node_classes.Statement
         context = contextmod.copy_context(context)
         context.lookupname = name
 
-        metaclass = self.declared_metaclass(context=context)
+        metaclass = self.metaclass(context=context) #self.declared_metaclass(context=context)
         try:
             attributes = self.getattr(name, context, class_context=class_context)
             # If we have more than one attribute, make sure that those starting from
