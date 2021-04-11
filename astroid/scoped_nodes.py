@@ -2593,9 +2593,11 @@ class ClassDef(mixins.FilterStmtsMixin, LocalsDictNodeNG, node_classes.Statement
                         yield from function.infer_call_result(
                             caller=self, context=context
                         )
-                    # If we have a metaclass, we're accessing this attribute through
-                    # the class itself, which means we can solve the property
-                    elif metaclass:
+                    # If we're in a class context, we need to determine if the property
+                    # was defined in the metaclass (a derived class must be a subclass of the metaclass
+                    # of all its bases), in which case we can resolve the property. If not, i.e. the
+                    # property is defined in some base class instead, then we return the property object
+                    elif metaclass and function.parent.scope() is metaclass:
                         # Resolve a property as long as it is not accessed through
                         # the class itself.
                         yield from function.infer_call_result(
