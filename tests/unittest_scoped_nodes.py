@@ -2031,6 +2031,21 @@ def test_issue940_metaclass_derived_funcdef():
     assert [c.value for c in inferred_result.elts] == ['a', 'func']
 
 
+def test_issue940_enums_as_a_real_world_usecase():
+    node = builder.extract_node(
+        """
+    from enum import Enum
+    class Sounds(Enum):
+        bee = "buzz"
+        cat = "meow"
+    Sounds.__members__
+    """
+    )
+    inferred_result = next(node.infer())
+    assert isinstance(inferred_result, nodes.List)
+    assert [c.value for c in inferred_result.elts] == ['buzz', 'meow']
+
+
 def test_metaclass_cannot_infer_call_yields_an_instance():
     node = builder.extract_node(
         """
