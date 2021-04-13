@@ -1432,7 +1432,9 @@ class ClassNodeTest(ModuleLoader, unittest.TestCase):
             pass
         class B:
             pass
-        scope = object()
+        class Scope:
+            pass
+        scope = Scope()
         scope.A = A
         scope.B = B
         class C(scope.A, scope.B):
