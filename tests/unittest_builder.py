@@ -27,7 +27,7 @@ import sys
 import unittest
 
 import pytest
-from astroid import builder
+from astroid import builder, Instance
 from astroid import exceptions
 from astroid import manager
 from astroid import nodes
@@ -478,6 +478,53 @@ class BuilderTest(unittest.TestCase):
         lclass = lclass[0]
         self.assertIn("assign_type", lclass.locals)
         self.assertIn("type", lclass.locals)
+
+    def test_infer_can_assign_regular_object(self):
+        mod = builder.parse(
+            """
+            class A:
+                pass
+            a = A()
+            a.value = "is set"
+            a.other = "is set"
+        """
+        )
+        obj = list(mod.igetattr("a"))
+        self.assertEqual(len(obj), 1)
+        obj = obj[0]
+        self.assertIsInstance(obj, Instance)
+        self.assertIn("value", obj.instance_attrs)
+        self.assertIn("other", obj.instance_attrs)
+
+    def test_infer_can_assign_has_slots(self):
+        mod = builder.parse(
+            """
+            class A:
+                __slots__ = ('value',)
+            a = A()
+            a.value = "is set"
+            a.other = "not set"
+        """
+        )
+        obj = list(mod.igetattr("a"))
+        self.assertEqual(len(obj), 1)
+        obj = obj[0]
+        self.assertIsInstance(obj, Instance)
+        self.assertIn("value", obj.instance_attrs)
+        self.assertNotIn("other", obj.instance_attrs)
+
+    def test_infer_can_assign_no_classdict(self):
+        mod = builder.parse(
+            """
+            a = object()
+            a.value = "not set"
+        """
+        )
+        obj = list(mod.igetattr("a"))
+        self.assertEqual(len(obj), 1)
+        obj = obj[0]
+        self.assertIsInstance(obj, Instance)
+        self.assertNotIn("value", obj.instance_attrs)
 
     def test_augassign_attr(self):
         builder.parse(
