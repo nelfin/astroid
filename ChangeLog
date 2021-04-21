@@ -32,6 +32,10 @@ Release Date: 2021-04-10
 
   Closes PyCQA/pylint#2822
 
+* Fix some spurious cycles detected in ``context.path`` leading to more cases
+  that can now be inferred
+
+  Closes #926
 
 What's New in astroid 2.5.2?
 ============================
